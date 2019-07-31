@@ -43,7 +43,10 @@ import h5py
 import sys
 import numpy
 import postgap.FinemapIntegration
+
+## new imports
 import fnmatch
+import os
 
 VEP_impact_to_score = {
 	'HIGH': 4,
@@ -729,28 +732,28 @@ class Jeme_ENCODE(Cisreg_source):
 	display_name = "Jeme_ENCODE"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_ENCODE" % len(snps))
-    		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed')
-    		snp_hash = dict( (snp.rsID, snp) for snp in snps)
-    		res=[]
-    		for tf in tissues_f:
+		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed')
+		snp_hash = dict( (snp.rsID, snp) for snp in snps)
+		res=[]
+		for tf in tissues_f:
 			intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + '/Jeme_ENCODE/' + tf)
-      			for feature in intersection:
+			for feature in intersection:
 				gene = postgap.Ensembl_lookup.get_gene(feature[4])
-        			if gene is None:
+				if gene is None:
 					return None
-        			snp = snp_hash[feature[8]]
-        			score= float(feature[3])
-        			res.append(Cisregulatory_Evidence(
-					snp = snp,
-          				gene = gene,
-          				score = score,
-          				source = self.display_name,
-          				study = None,
-          				info = None,
-          				z_score = None,
-         				pvalue = None,
-          				beta = None,
-          				tissue = tf
+				snp = snp_hash[feature[8]]
+				score= float(feature[3])
+				res.append(Cisregulatory_Evidence(
+				snp = snp,
+						gene = gene,
+						score = score,
+						source = self.display_name,
+						study = None,
+						info = None,
+						z_score = None,
+						pvalue = None,
+						beta = None,
+						tissue = tf
 				))
 		logging.info("\tFound %i interactions in Jeme_ENCODE" % (len(res)))
 		return res
@@ -760,29 +763,29 @@ class Jeme_FANTOM5(Cisreg_source):
 	display_name = "Jeme_FANTOM5"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_FANTOM5" % len(snps))
-    		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed')
-    		snp_hash = dict( (snp.rsID, snp) for snp in snps)
-    		res=[]
-    		for tf in tissues_f:
+		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed')
+		snp_hash = dict( (snp.rsID, snp) for snp in snps)
+		res=[]
+		for tf in tissues_f:
 			intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + '/Jeme_FANTOM5/' + tf)
-      			for feature in intersection:
-        		gene = postgap.Ensembl_lookup.get_gene(feature[3])
-        		if gene is None:
-				return None
-        		snp = snp_hash[feature[8]]
-        		score= float(feature[3])
-        		res.append(Cisregulatory_Evidence(
+			for feature in intersection:
+				gene = postgap.Ensembl_lookup.get_gene(feature[3])
+				if gene is None:
+					return None
+				snp = snp_hash[feature[8]]
+				score= float(feature[3])
+				res.append(Cisregulatory_Evidence(
 				snp = snp,
-          			gene = gene,
-          			score = score,
-          			source = self.display_name,
-          			study = None,
-          			info = None,
-          			z_score = None,
-          			pvalue = None,
-          			beta = None,
-          			tissue = tf
-			))
+					gene = gene,
+					score = score,
+					source = self.display_name,
+					study = None,
+					info = None,
+					z_score = None,
+					pvalue = None,
+					beta = None,
+					tissue = tf
+				))
 		logging.info("\tFound %i interactions in Jeme_FANTOM5" % (len(res)))
 		return res
 	

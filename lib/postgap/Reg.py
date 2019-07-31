@@ -38,6 +38,9 @@ import subprocess
 import tempfile
 import fnmatch
 
+## new imports
+import os
+
 class Reg_source(object):
 	def run(self, ld_snps, tissues):
 		"""
