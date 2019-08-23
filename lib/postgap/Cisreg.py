@@ -127,9 +127,9 @@ class GTEx(Cisreg_source):
 		#if cisreg_betas is None:
 		#	raise Exception
 		while(True):
-                        cisreg_betas = self._snp_betas(snp)
-                        if cisreg_betas is not None and len(cisreg_betas) > 0:
-                                break
+			cisreg_betas = self._snp_betas(snp)
+			if cisreg_betas is not None and len(cisreg_betas) > 0:
+				break
                 
 		if len(cisreg_betas) == 0:
 			raise Exception
@@ -509,7 +509,7 @@ class Fantom5(Cisreg_source):
 
 		logging.info("\tSearching for overlaps from %i SNPs to Fantom5" % len(snps))
 		
-		intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + "/Fantom5.bed")
+		intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + "/Fantom5.bed.gz")
 		fdr_model = pickle.load(open(postgap.Globals.DATABASES_DIR + "/Fantom5.fdrs"))
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		hits  = filter(lambda X: X is not None, map(lambda X: self.get_evidence(X, fdr_model, snp_hash), intersection))
@@ -572,7 +572,7 @@ class DHS(Cisreg_source):
 
 		logging.info("\tSearching for gene associations in DHS")
 		
-		intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + "/DHS.bed")
+		intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + "/DHS.bed.gz")
 		fdr_model = pickle.load(open(postgap.Globals.DATABASES_DIR+"/DHS.fdrs"))
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res = filter (lambda X: X is not None and X.score, (self.get_evidence(feature, fdr_model, snp_hash) for feature in intersection))
@@ -674,7 +674,7 @@ class PCHIC(Cisreg_source):
 
 		logging.info("\tSearching for gene associations in PCHIC")
 		
-		intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + "/pchic.bed")
+		intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + "/pchic.bed.gz")
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res = filter (lambda X: X is not None and X.score >5., (self.get_evidence(feature, snp_hash) for feature in intersection))
 
@@ -732,7 +732,7 @@ class Jeme_ENCODE(Cisreg_source):
 	display_name = "Jeme_ENCODE"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_ENCODE" % len(snps))
-		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed')
+		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed.gz')
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:
@@ -758,12 +758,40 @@ class Jeme_ENCODE(Cisreg_source):
 		logging.info("\tFound %i interactions in Jeme_ENCODE" % (len(res)))
 		return res
 
+class GWAS_Genes(Cisreg_source):
+	display_name = "GWAS_Genes"
+  	def run(self, snps, tissues):
+		logging.info("\tSearching for overlaps from %i SNPs to GWAS_Genes" % len(snps))
+		tissues_f=fnmatch.filter(os.listdir('databases/SCZ/GWAS-Genes/'), '*.bed.gz')
+		snp_hash = dict( (snp.rsID, snp) for snp in snps)
+		res=[]
+		for tf in tissues_f:
+			intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + '/SCZ/GWAS-Genes/' + tf)
+			for feature in intersection:
+				gene = feature[4] if feature[4] is not None else None
+				snp = snp_hash[feature[8]]
+				score= float(feature[3])
+				res.append(Cisregulatory_Evidence(
+					snp = snp,
+					gene = gene,
+					score = score,
+					source = self.display_name,
+					study = None,
+					info = None,
+					z_score = None,
+					pvalue = None,
+					beta = None,
+					tissue = tf
+				))
+		logging.info("\tFound %i interactions in GWAS_Genes" % (len(res)))
+		return res
+
 
 class Jeme_FANTOM5(Cisreg_source):
 	display_name = "Jeme_FANTOM5"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_FANTOM5" % len(snps))
-		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed')
+		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed.gz')
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:
@@ -773,7 +801,8 @@ class Jeme_FANTOM5(Cisreg_source):
 				if gene is None:
 					return None
 				snp = snp_hash[feature[8]]
-				score= float(feature[3])
+				#score= float(feature[3])
+				score= float(feature[4])
 				res.append(Cisregulatory_Evidence(
 				snp = snp,
 					gene = gene,
@@ -803,7 +832,7 @@ class nearest_gene(Cisreg_source):
 		"""
 
 		snps = list(snps)
-		bed = postgap.Globals.DATABASES_DIR + "/Ensembl_TSSs.bed"
+		bed = postgap.Globals.DATABASES_DIR + "/Ensembl_TSSs.bed.gz"
 		res = postgap.BedTools.closest(snps, bed)
 		snp_hash = dict((snp.rsID, snp) for snp in snps)
 

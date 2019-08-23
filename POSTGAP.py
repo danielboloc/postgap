@@ -95,26 +95,36 @@ def main():
 
 	postgap.Globals.ALL_TISSUES=postgap.Integration.get_all_tissues()
 	
-	CAPE_eQTL = open('CAPE_eQTL.txt').read().split(',')
-	postgap.Globals.CAPE_eQTL_TISSUES = [s.replace("vcf.gz","bed") for s in CAPE_eQTL ]
+	#CAPE_eQTL = open('CAPE_eQTL.txt').read().split(',')
+	#postgap.Globals.CAPE_eQTL_TISSUES = [s.replace("vcf.gz","bed") for s in CAPE_eQTL ]
+	postgap.Globals.CAPE_eQTL_TISSUES = ['CAPE_eQTL_E007.bed.gz', 'CAPE_eQTL_E046.bed.gz','CAPE_eQTL_E034.bed.gz',
+                                         'CAPE_eQTL_E032.bed.gz', 'CAPE_eQTL_E029.bed.gz' ]
+
+	# CAPE_dsQTL = open('CAPE_dsQTL.txt').read().split(',')
+	# postgap.Globals.CAPE_dsQTL_TISSUES = [s.replace("vcf.gz","bed") for s in CAPE_dsQTL ]
+	postgap.Globals.CAPE_dsQTL_TISSUES = ['CAPE_dsQTL_E029.bed.gz','CAPE_dsQTL_E007.bed.gz',
+                                          'CAPE_dsQTL_E034.bed.gz','CAPE_dsQTL_E046.bed.gz','CAPE_dsQTL_E032.bed.gz']
 	
-	CAPE_dsQTL = open('CAPE_dsQTL.txt').read().split(',')
-	postgap.Globals.CAPE_dsQTL_TISSUES = [s.replace("vcf.gz","bed") for s in CAPE_dsQTL ]
+	# deltaSVM = open('deltaSVM.txt').read().split(',')
+	# postgap.Globals.deltaSVM_TISSUES = [s.replace("vcf.gz","bed") for s in deltaSVM ]
+	postgap.Globals.deltaSVM_TISSUES = ['deltaSVM_E007.bed.gz','deltaSVM_E029.bed.gz','deltaSVM_E034.bed.gz',
+                                        'deltaSVM_E032.bed.gz']
 	
-	deltaSVM = open('deltaSVM.txt').read().split(',')
-	postgap.Globals.deltaSVM_TISSUES = [s.replace("vcf.gz","bed") for s in deltaSVM ]
+	# DeepSEA = open('DeepSEA.txt').read().split(',')
+	# postgap.Globals.DeepSEA_TISSUES = [s.replace("vcf.gz","bed") for s in DeepSEA ]
+	postgap.Globals.DeepSEA_TISSUES = ['DeepSEA_E124.bed.gz', 'DeepSEA_E125.bed.gz']
 	
-	DeepSEA = open('DeepSEA.txt').read().split(',')
-	postgap.Globals.DeepSEA_TISSUES = [s.replace("vcf.gz","bed") for s in DeepSEA ]
+	# DNase1 = open('DNase1.txt').read().split(',')
+	# postgap.Globals.DNase1_TISSUES = map(( lambda x: x + '.bed'), DNase1)
+	postgap.Globals.DNase1_TISSUES = ['Brain.bed.gz','Brain_ENCSR189GMC.bed.gz']
 	
-	DNase1 = open('DNase1.txt').read().split(',')
-	postgap.Globals.DNase1_TISSUES = map(( lambda x: x + '.bed'), DNase1)
+	# Jeme_ENCODE = open('Jeme_ENCODE.txt').read().split(',')
+	# postgap.Globals.Jeme_ENCODE_TISSUES = [s.replace(".csv",".bed") for s in Jeme_ENCODE ]
+	postgap.Globals.Jeme_ENCODE_TISSUES = ['encoderoadmap_lasso.36.bed.gz','encoderoadmap_lasso.40.bed.gz','encoderoadmap_lasso.32.bed.gz','encoderoadmap_lasso.81.bed.gz','encoderoadmap_lasso.46.bed.gz','encoderoadmap_lasso.34.bed.gz','encoderoadmap_lasso.74.bed.gz','encoderoadmap_lasso.47.bed.gz','encoderoadmap_lasso.73.bed.gz','encoderoadmap_lasso.38.bed.gz','encoderoadmap_lasso.31.bed.gz','encoderoadmap_lasso.45.bed.gz','encoderoadmap_lasso.43.bed.gz','encoderoadmap_lasso.35.bed.gz','encoderoadmap_lasso.33.bed.gz','encoderoadmap_lasso.41.bed.gz','encoderoadmap_lasso.30.bed.gz','encoderoadmap_lasso.53.bed.gz','encoderoadmap_lasso.44.bed.gz','encoderoadmap_lasso.39.bed.gz','encoderoadmap_lasso.48.bed.gz','encoderoadmap_lasso.70.bed.gz','encoderoadmap_lasso.7.bed.gz','encoderoadmap_lasso.68.bed.gz','encoderoadmap_lasso.42.bed.gz','encoderoadmap_lasso.67.bed.gz','encoderoadmap_lasso.72.bed.gz','encoderoadmap_lasso.82.bed.gz','encoderoadmap_lasso.29.bed.gz','encoderoadmap_lasso.37.bed.gz','encoderoadmap_lasso.9.bed.gz','encoderoadmap_lasso.69.bed.gz','encoderoadmap_lasso.71.bed.gz']
 	
-	Jeme_ENCODE = open('Jeme_ENCODE.txt').read().split(',')
-	postgap.Globals.Jeme_ENCODE_TISSUES = [s.replace(".csv",".bed") for s in Jeme_ENCODE ]
-	
-	Jeme_FANTOM5 = open('Jeme_FANTOM5.txt').read().split(',')
-	postgap.Globals.Jeme_FANTOM5_TISSUES = [s.replace(".csv",".bed") for s in Jeme_FANTOM5 ]
+	# Jeme_FANTOM5 = open('Jeme_FANTOM5.txt').read().split(',')
+	# postgap.Globals.Jeme_FANTOM5_TISSUES = [s.replace(".csv",".bed") for s in Jeme_FANTOM5 ]
+	postgap.Globals.Jeme_FANTOM5_TISSUES = ['fantom5_lasso.389.bed.gz','fantom5_lasso.91.bed.gz','fantom5_lasso.124.bed.gz','fantom5_lasso.129.bed.gz','fantom5_lasso.798.bed.gz','fantom5_lasso.413.bed.gz','fantom5_lasso.792.bed.gz','fantom5_lasso.32.bed.gz','fantom5_lasso.31.bed.gz','fantom5_lasso.418.bed.gz','fantom5_lasso.242.bed.gz','fantom5_lasso.460.bed.gz','fantom5_lasso.454.bed.gz','fantom5_lasso.557.bed.gz','fantom5_lasso.555.bed.gz','fantom5_lasso.240.bed.gz','fantom5_lasso.558.bed.gz','fantom5_lasso.793.bed.gz','fantom5_lasso.83.bed.gz','fantom5_lasso.548.bed.gz','fantom5_lasso.85.bed.gz','fantom5_lasso.29.bed.gz','fantom5_lasso.532.bed.gz','fantom5_lasso.419.bed.gz','fantom5_lasso.554.bed.gz','fantom5_lasso.553.bed.gz','fantom5_lasso.790.bed.gz','fantom5_lasso.453.bed.gz','fantom5_lasso.551.bed.gz','fantom5_lasso.571.bed.gz','fantom5_lasso.86.bed.gz','fantom5_lasso.421.bed.gz','fantom5_lasso.130.bed.gz','fantom5_lasso.550.bed.gz','fantom5_lasso.35.bed.gz','fantom5_lasso.184.bed.gz','fantom5_lasso.33.bed.gz','fantom5_lasso.6.bed.gz','fantom5_lasso.552.bed.gz','fantom5_lasso.787.bed.gz','fantom5_lasso.423.bed.gz','fantom5_lasso.315.bed.gz','fantom5_lasso.25.bed.gz','fantom5_lasso.804.bed.gz','fantom5_lasso.30.bed.gz','fantom5_lasso.424.bed.gz','fantom5_lasso.788.bed.gz','fantom5_lasso.92.bed.gz','fantom5_lasso.799.bed.gz','fantom5_lasso.382.bed.gz','fantom5_lasso.177.bed.gz','fantom5_lasso.312.bed.gz','fantom5_lasso.556.bed.gz','fantom5_lasso.319.bed.gz','fantom5_lasso.89.bed.gz','fantom5_lasso.311.bed.gz','fantom5_lasso.88.bed.gz','fantom5_lasso.84.bed.gz','fantom5_lasso.36.bed.gz','fantom5_lasso.90.bed.gz','fantom5_lasso.243.bed.gz','fantom5_lasso.241.bed.gz','fantom5_lasso.28.bed.gz','fantom5_lasso.452.bed.gz','fantom5_lasso.789.bed.gz','fantom5_lasso.786.bed.gz','fantom5_lasso.520.bed.gz','fantom5_lasso.785.bed.gz','fantom5_lasso.794.bed.gz','fantom5_lasso.237.bed.gz','fantom5_lasso.94.bed.gz','fantom5_lasso.791.bed.gz','fantom5_lasso.383.bed.gz','fantom5_lasso.420.bed.gz','fantom5_lasso.87.bed.gz','fantom5_lasso.27.bed.gz','fantom5_lasso.412.bed.gz','fantom5_lasso.34.bed.gz']
 
 
 	if options.hdf5 is not None and options.sqlite is not None:
@@ -163,6 +173,9 @@ def main():
 	if options.Reg is not None:
 		postgap.Globals.Reg_adaptors = options.Reg
 
+	# Print the file that is working on to get more clues about downstream errors
+	logging.info("### WORKING WITH FILE: %s ###" % postgap.Globals.GWAS_SUMMARY_STATS_FILE) 	
+
 	if len(options.diseases) > 0 or len(expanded_efo_iris) > 0:
 		logging.info("Starting diseases_to_genes")
 		res = postgap.Integration.diseases_to_genes(options.diseases, expanded_efo_iris, "CEPH", options.tissues)
@@ -176,6 +189,9 @@ def main():
 		if options.tissues is None:
 			options.tissues = ["Whole_Blood"]
 		res = postgap.Integration.ld_snps_to_genes([snp], options.tissues)
+
+	# Print the file that is working on to get more clues about downstream errors
+	logging.info("### FINISHED WITH FILE: %s ###" % postgap.Globals.GWAS_SUMMARY_STATS_FILE) 	
 
 	if options.output is None:
 		output = sys.stdout
@@ -257,8 +273,12 @@ def get_options():
 		    )
 
     GWAS_options = ["GWAS_Catalog", "GRASP", "Phewas_Catalog", "GWAS_DB"]
-    CisReg_options = ["GTEx", "VEP", "Fantom5", "DHS", "PCHiC", "Nearest", "Jeme_ENCODE", "Jeme_FANTOM5"]
-    Reg_options = ["Regulome", "VEP_reg", 'GERP','CAPE_eQTL', 'CAPE_dsQTL', 'deltaSVM', 'DeepSEA','CATO', 'DNase1']
+    CisReg_options = ["GTEx", "VEP", "Fantom5", "DHS", "PCHiC", "Nearest", "Jeme_ENCODE", "Jeme_FANTOM5", "GWAS_Genes"]
+    #CisReg_options = ["GTEx", "VEP", "Fantom5", "DHS", "PCHiC", "Nearest"]
+    #CisReg_options = ['GTEx']
+    Reg_options = ["Regulome", "VEP_reg", 'GERP','CAPE_eQTL', 'CAPE_dsQTL', 'deltaSVM', 'DeepSEA','CATO', 'DNase1', 'Diff_Meth', 'CNV']
+    #Reg_options = ["Regulome", "VEP_reg"]
+    #Reg_options = ['Regulome', 'VEP_reg']
     TYPE_options = ['binom','ML','EM', 'ML_EM']
 
     parser.add_argument('--efos', nargs='*')

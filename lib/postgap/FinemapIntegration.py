@@ -48,8 +48,8 @@ def compute_gwas_posteriors(cluster_associations, populations):
 	#prepped_clusters = [(prepare_cluster_for_finemap(cluster, associations, populations), associations) for cluster, associations in cluster_associations]
         prepped_clusters = []
         for cluster, associations in cluster_associations:
-                if ( len(cluster.ld_snps) < 100 ):
-                    continue
+                #if ( len(cluster.ld_snps) < 100 ):
+                #    continue
                 prepped_clusters.append( (prepare_cluster_for_finemap(cluster, associations, populations), associations) )
         # MLE calculation 
         prepped_clusters= [(postgap.Finemap.mk_modified_clusters(cluster), associations) for cluster, associations in prepped_clusters]
@@ -119,7 +119,7 @@ def extract_snp_annotations(cluster, associations):
         #                'Pituitary_AKTIP',
         #                'Thyroid_RPGRIP1L']
         for association in associations:
-                for evidence in association.cisregulatory_evidence:
+                for evidence in association.cisregulatory_evidence + association.regulatory_evidence:
                     if evidence.source in ['GTEx']:
                         continue
                     #if evidence.source =='GTEx':
@@ -360,8 +360,8 @@ def compute_gene_tissue_joint_posterior(cluster, gene, tissue, eQTL_snp_hash, gw
 	## eQTL posteriors
 	eQTL_configuration_posteriors = compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotations)
 	## Joint posterior
-        joint_out =eQTL_configuration_posteriors.joint_posterior(gwas_configuration_posteriors)
-        pickle.dump(joint_out[1], open(postgap.Globals.OUTPUT+'_'+str(tissue)+'_'+str(gene.name)+'_snp_posterior.pkl', "w")) # DEBUG remove hard coded path
+	joint_out =eQTL_configuration_posteriors.joint_posterior(gwas_configuration_posteriors)
+	pickle.dump(joint_out[1], open(postgap.Globals.OUTPUT+'_'+str(tissue)+'_'+str(gene.name)+'_snp_posterior.pkl', "w")) # DEBUG remove hard coded path
 	return joint_out[0]
 
 def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotations):
@@ -383,6 +383,7 @@ def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotati
 	known_betas = numpy.array([eQTL_snp_hash[ld_snp.rsID][1] for ld_snp in cluster.ld_snps if ld_snp.rsID in eQTL_snp_hash])
 	assert len(known_z_scores) > 0
 	assert len(missing_indices) != len(cluster.ld_snps), (missing_indices, known_z_scores)
+	# Same as above??
 	assert len(cluster.ld_snps) == cluster.ld_matrix.shape[0], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
 	assert len(cluster.ld_snps) == cluster.ld_matrix.shape[1], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
 
@@ -390,7 +391,7 @@ def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotati
 		# Generate LD matrix of known values
 		ld_matrix_known = numpy.delete(cluster.ld_matrix, missing_indices, axis=1)
 		ld_matrix_known = numpy.delete(ld_matrix_known, missing_indices, axis=0)
-		assert ld_matrix_known.size > 0, (missing_indices, cluster.ld_matrix, ld_matrix_known)
+		#assert ld_matrix_known.size > 0, (missing_indices, cluster.ld_matrix, ld_matrix_known)
 
 		# Generate LD matrix of known SNPs to missing SNPs
 		ld_matrix_k2m = cluster.ld_matrix[missing_indices, :]
@@ -399,7 +400,7 @@ def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotati
 		# Imputation
 		shrink_lambda=0.1 # shrinkage factor, magic number
 		ld_matrix_known_shrink = shrink_lambda *  numpy.diag(numpy.ones(ld_matrix_known.shape[0])) + (1-shrink_lambda) * ld_matrix_known
-		assert ld_matrix_known_shrink.size > 0, (missing_indices, ld_matrix, ld_matrix_known)
+		#assert ld_matrix_known_shrink.size > 0, (missing_indices, ld_matrix, ld_matrix_known)
 		ld_matrix_k2m_shrink = (1-shrink_lambda) * ld_matrix_k2m
 		z_shrink_imputed = numpy.dot(numpy.dot(ld_matrix_k2m_shrink,numpy.linalg.pinv(ld_matrix_known_shrink, 0.0001)) , known_z_scores)
 		beta_shrink_imputed = numpy.dot(numpy.dot(ld_matrix_k2m_shrink,numpy.linalg.pinv(ld_matrix_known_shrink, 0.0001)) , known_betas)
@@ -446,7 +447,7 @@ def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotati
                 lambdas      = lambdas, #cluster.lambdas, # Update the lambdas with eQTL data
                 mafs         = mafs,
                 annotations  = annotations,
-                kmax         = 2, #eQTL_kmax
+                kmax         = 3, #eQTL_kmax
                 kstart       = 1 #eQTL_kstart
             )
 

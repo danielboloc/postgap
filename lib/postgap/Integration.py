@@ -77,10 +77,11 @@ def diseases_to_gwas_snps(diseases, efos):
 		Returntype: [ GWAS_SNP ]
 
 	"""
+	tmp = [X.pvalue for X in scan_disease_databases(diseases, efos)]
 	res = filter(lambda X: X.pvalue < postgap.Globals.GWAS_PVALUE_CUTOFF, scan_disease_databases(diseases, efos))
 
 	logging.info("Found %i GWAS SNPs associated to diseases (%s) or EFO IDs (%s) after p-value filter (%f)" % (len(res), ", ".join(diseases), ", ".join(efos), postgap.Globals.GWAS_PVALUE_CUTOFF))
-
+	logging.info("Found these pvalues: %s GWAS SNPs associated to diseases" % tmp)
 	return res
 
 def scan_disease_databases(diseases, efos):
@@ -173,20 +174,20 @@ def clusters_to_genes(clusters, populations, tissue_weights):
 	"""
 	# Collect regulatory and cis-regulatory evidence across clusters
 	cluster_associations = [(cluster, ld_snps_to_genes(cluster.ld_snps, tissue_weights)) for cluster in clusters]
-        with open('cluster_association.pkl','w') as f:
-                pickle.dump(cluster_associations,f)
-        #with open('cluster_association.pkl') as f:
-        #        cluster_associations= pickle.load(f)
-        # If required, perform genome-wide GWAS finemapping
-        
-        # Extract the GWAS and eQTL F.A parameters (lambdas)
-        with open('GWAS_lambdas_'+postgap.Globals.GWAS_SUMMARY_STATS_FILE,'w') as fw1:
-                fw1.write('cluster\tsource\tlambdas\n')
-        with open('eQTL_lambdas_'+postgap.Globals.GWAS_SUMMARY_STATS_FILE,'w') as fw2:
-                fw2.write('cluster\ttissue\tgene\tlambdas\n')
-        # ===
-	
-        if postgap.Globals.PERFORM_BAYESIAN:
+	with open('cluster_association_'+postgap.Globals.OUTPUT+'.pkl','w') as f:
+	        pickle.dump(cluster_associations,f)
+	#with open('cluster_association.pkl') as f:
+	#        cluster_associations= pickle.load(f)
+	# If required, perform genome-wide GWAS finemapping
+
+	# Extract the GWAS and eQTL F.A parameters (lambdas)
+	with open('GWAS_lambdas_'+postgap.Globals.GWAS_SUMMARY_STATS_FILE,'w') as fw1:
+	        fw1.write('cluster\tsource\tlambdas\n')
+	with open('eQTL_lambdas_'+postgap.Globals.GWAS_SUMMARY_STATS_FILE,'w') as fw2:
+	        fw2.write('cluster\ttissue\tgene\tlambdas\n')
+    # ===
+
+	if postgap.Globals.PERFORM_BAYESIAN:
 		cluster_associations = postgap.FinemapIntegration.compute_gwas_posteriors(cluster_associations, populations)
 	#print cluster_associations[0][0].ld_matrix
 	
@@ -414,62 +415,62 @@ def cluster_to_genes(cluster, associations, tissues, populations):
 
     """
     if postgap.Globals.PERFORM_BAYESIAN:
-      assert len(cluster.ld_snps) == cluster.ld_matrix.shape[0], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
-      assert len(cluster.ld_snps) == cluster.ld_matrix.shape[1], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
-      gene_tissue_posteriors = postgap.FinemapIntegration.compute_joint_posterior(cluster, associations)
+		assert len(cluster.ld_snps) == cluster.ld_matrix.shape[0], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
+		assert len(cluster.ld_snps) == cluster.ld_matrix.shape[1], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
+		gene_tissue_posteriors = postgap.FinemapIntegration.compute_joint_posterior(cluster, associations)
 
-      res = [
-	GeneCluster_Association(
-	    gene = gene,
-	    score = None,
-	    collocation_posterior = gene_tissue_posteriors[gene],
-	    cluster = cluster,
-	    evidence = filter(lambda X: X.gene == gene, associations), # This is a [ GeneSNP_Association ]
-	    r2 = None
-	)
-	for gene in gene_tissue_posteriors
-      ]
+		res = [
+			GeneCluster_Association(
+			    gene = gene,
+			    score = None,
+			    collocation_posterior = gene_tissue_posteriors[gene],
+			    cluster = cluster,
+			    evidence = filter(lambda X: X.gene == gene, associations), # This is a [ GeneSNP_Association ]
+			    r2 = None
+			)
+			for gene in gene_tissue_posteriors
+		]
 
-      logging.info("\tFound %i genes associated" % (len(res)))
+		logging.info("\tFound %i genes associated" % (len(res)))
 
     else:
-      # Compute LD from top SNP
-      top_gwas_hit = sorted(cluster.gwas_snps, key=lambda X: X.pvalue)[-1]
-      ld = postgap.LD.get_lds_from_top_gwas(top_gwas_hit.snp, cluster.ld_snps, populations)
+		# Compute LD from top SNP
+		top_gwas_hit = sorted(cluster.gwas_snps, key=lambda X: X.pvalue)[-1]
+		ld = postgap.LD.get_lds_from_top_gwas(top_gwas_hit.snp, cluster.ld_snps, populations)
 
-      # Compute gene score
-      gene_scores = dict(
-	  ((association.gene, association.snp), (association, association.score * ld[association.snp]))
-	  for association in associations
-      )
+		# Compute gene score
+		gene_scores = dict(
+		((association.gene, association.snp), (association, association.score * ld[association.snp]))
+		for association in associations
+		)
 
-      if len(gene_scores) == 0:
-	  return []
+		if len(gene_scores) == 0:
+			return []
 
-      # OMIM exception
-      max_score = max(X[1] for X in gene_scores.values())
-      for gene, snp in gene_scores:
-	  if len(gene_to_phenotypes(gene)):
-	      gene_scores[(gene, snp)][1] = max_score
+		# OMIM exception
+		max_score = max(X[1] for X in gene_scores.values())
+		for gene, snp in gene_scores:
+			if len(gene_to_phenotypes(gene)):
+				gene_scores[(gene, snp)][1] = max_score
 
-      # PICS score precomputed and normalised
-      pics = PICS(ld, top_gwas_hit.pvalue)
+		# PICS score precomputed and normalised
+		pics = PICS(ld, top_gwas_hit.pvalue)
 
-      # Compute posterior
-      res = [
-	  GeneCluster_Association(
-	      gene = gene,
-	      score = total_score(pics[snp], gene_scores[(gene, snp)][1]),
-	      collocation_posterior = None,
-	      cluster = cluster,
-	      evidence = gene_scores[(gene, snp)][:1], # This is a [ GeneSNP_Association ]
-	      r2 = ld[snp]
-	  )
-          for (gene, snp) in gene_scores
-	  if snp in pics
-      ]
+		# Compute posterior
+		res = [
+			GeneCluster_Association(
+			  gene = gene,
+			  score = total_score(pics[snp], gene_scores[(gene, snp)][1]),
+			  collocation_posterior = None,
+			  cluster = cluster,
+			  evidence = gene_scores[(gene, snp)][:1], # This is a [ GeneSNP_Association ]
+			  r2 = ld[snp]
+			)
+			for (gene, snp) in gene_scores
+			if snp in pics
+		]
 
-      logging.info("\tFound %i genes associated around GWAS SNP %s" % (len(res), top_gwas_hit.snp.rsID))
+		logging.info("\tFound %i genes associated around GWAS SNP %s" % (len(res), top_gwas_hit.snp.rsID))
 
     # Pick the association with the highest score
     return sorted(res, key=lambda X: X.score)
@@ -616,28 +617,6 @@ def compute_v2g_scores(reg, cisreg):
 
 			if evidence.source == 'GTEx':
 				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-				
-			if evidence.source == 'CAPE_eQTL':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-			  
-			if evidence.source == 'CAPE_dsQTL':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-			  
-			if evidence.source == 'deltaSVM':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-			  
-			if evidence.source == 'DeepSEA':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-			  
-			if evidence.source == 'DNase1':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-					
-			if evidence.source == 'Jeme_ENCODE':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-			  
-			if evidence.source == 'Jeme_FANTOM5':
-				intermediary_scores[gene][evidence.tissue] = float(evidence.score)
-
 
 			# Ad hoc bounds defined here:
 		# PCHiC

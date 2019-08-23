@@ -56,7 +56,9 @@ EVIDENCE_WEIGHTS = {
 	'Jeme_ENCODE': 1,
 	'Jeme_FANTOM5': 1,
 	'GERP':1,
-	'Nearest': 1
+	'Nearest': 1,
+	'Diff_Meth': 1,
+	'GWAS_Genes': 1
 }
 
 GWAS_adaptors = None
