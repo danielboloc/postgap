@@ -76,6 +76,7 @@ class GTEx(Cisreg_source):
 
 		res = concatenate(map(self.snp, snps))
 		logging.info("\tFound %i interactions in GTEx" % (len(res)))
+		#logging.info("\tBETA is: %s" % (res))
 		return res
 
 	def snp(self, snp):
@@ -290,7 +291,7 @@ class GTEx(Cisreg_source):
 			hdf5_snp_index = hdf5_snp_index  - 1
 
 
-			with h5py.File(postgap.Globals.GTEx_path) as hdf5_file:
+			with h5py.File(postgap.Globals.GTEx_path, 'r' ) as hdf5_file:
 				tissue_array_names = {k: (''.join(chr(i) for i in hdf5_file.get('dim_labels/1')[k]).rstrip('\0'))
 									  for k in range(0, len(hdf5_file.get('dim_labels/1')))}
 
@@ -308,7 +309,10 @@ class GTEx(Cisreg_source):
 				gene_list_filtered = [gene_range[k] for k in gene_index_list]
 				gene_array_names = {k:(''.join(chr(i) for i in hdf5_file.get('dim_labels/2')[k])).rstrip('\0') for k in gene_list_filtered}
 
-
+			#logging.info("### pvalue0 ### %s " % p_val_index[0])	
+			#logging.info("### pvalue1 ### %s " % p_val_index[1])	
+			#logging.info("### pvalue2 ### %s " % p_val_index[2])	
+			#logging.info("### beta ### %s " % beta)	
 			res = []
 			for k in range(len(p_val_index[0])):
 				pvalue = p_val[p_val_index[0][k]][p_val_index[1][k]][p_val_index[2][k]]
@@ -317,30 +321,33 @@ class GTEx(Cisreg_source):
 					continue
 
 				try:
-					beta = beta[p_val_index[0][k]][p_val_index[1][k]][p_val_index[2][k]]
-				except:
-					beta = None
+					# created betaV, if bete = beta... it will produce None all the way
+					betaV = beta[p_val_index[0][k]][p_val_index[1][k]][p_val_index[2][k]]
+					#logging.info("BETA IN TRY  is: %s" % (betaV))
+				except Exception as ex:
+					betaV = None
+					#logging.info("BETA IN EXCEPT  is: %s" % (ex))
 
 				if postgap.Globals.PERFORM_BAYESIAN:
-					z_score = postgap.FinemapIntegration.z_score_from_pvalue(pvalue,beta),
+					z_score = postgap.FinemapIntegration.z_score_from_pvalue(pvalue,betaV),
 				else:
 					z_score = None
 
-
-				res.append([
+				# Deleted [] around Cisregulatory_Evidence()	
+				res.append(
 					Cisregulatory_Evidence(
 						snp = snp,
 						gene= postgap.Ensembl_lookup.get_ensembl_gene(gene_array_names[gene_range_filtered[k]]),
 						tissue = tissue_array_names[p_val_index[1][k]],
 						score = 1 - float(pvalue),
 						source = self.display_name,
-						study = None,
+						study = self.display_name,
 						info = None,
 						z_score = z_score,
 						pvalue = pvalue,
-						beta = beta
+						beta = betaV
 					)
-				])
+				)
 
 			return res
 
@@ -448,7 +455,7 @@ class VEP(Cisreg_source):
 				))
 
 		logging.info("\tFound %i interactions in VEP" % (len(res)))
-
+		logging.info("VEP is: %s" % (res))
 		return res
 
 	def remove_none_elements(self, list):
@@ -519,7 +526,7 @@ class Fantom5(Cisreg_source):
 		res = filter(lambda X: X.score, hits)
 
 		logging.info("\tFound %i interactions in Fantom5" % (len(res)))
-
+		logging.info("Fantom5 is: %s" % (res))
 		return res
 
 	def get_evidence(self, feature, fdr_model, snp_hash):
@@ -578,7 +585,7 @@ class DHS(Cisreg_source):
 		res = filter (lambda X: X is not None and X.score, (self.get_evidence(feature, fdr_model, snp_hash) for feature in intersection))
 
 		logging.info("\tFound %i gene associations in DHS" % len(res))
-
+		logging.info("DHS is: %s" % (res))
 		return res
 
 	def get_evidence(self, feature, fdr_model, snp_hash):
@@ -679,7 +686,7 @@ class PCHIC(Cisreg_source):
 		res = filter (lambda X: X is not None and X.score >5., (self.get_evidence(feature, snp_hash) for feature in intersection))
 
 		logging.info("\tFound %i gene associations in PCHIC" % len(res))
-
+		logging.info("PCHIC is: %s" % (res))
 		return res
 
 	def get_evidence(self, feature, snp_hash):
@@ -756,6 +763,7 @@ class Jeme_ENCODE(Cisreg_source):
 						tissue = tf
 				))
 		logging.info("\tFound %i interactions in Jeme_ENCODE" % (len(res)))
+		logging.info("JEME_ENCODE is: %s" % (res))
 		return res
 
 class GWAS_Genes(Cisreg_source):
@@ -816,6 +824,7 @@ class Jeme_FANTOM5(Cisreg_source):
 					tissue = tf
 				))
 		logging.info("\tFound %i interactions in Jeme_FANTOM5" % (len(res)))
+		logging.info("JEME_FANTOM5 is: %s" % (res))
 		return res
 	
 class nearest_gene(Cisreg_source):

@@ -173,6 +173,7 @@ def clusters_to_genes(clusters, populations, tissue_weights):
 
 	"""
 	# Collect regulatory and cis-regulatory evidence across clusters
+	print "CLUSTER ORIG", clusters
 	cluster_associations = [(cluster, ld_snps_to_genes(cluster.ld_snps, tissue_weights)) for cluster in clusters]
 	with open('cluster_association_'+postgap.Globals.OUTPUT+'.pkl','w') as f:
 	        pickle.dump(cluster_associations,f)
@@ -562,6 +563,8 @@ def ld_snps_to_genes(ld_snps, tissues):
 
 	# Extract SNP specific info:
 	reg = regulatory_evidence(cisreg.keys(), tissues) # Hash: SNP => [ Regulatory_evidence ]
+
+	#logging.info("### ld_snps_to_genes() is: %s ###" % (concatenate((create_SNP_GeneSNP_Associations(snp, reg[snp], cisreg[snp]) for snp in cisreg))))
 		
 	return concatenate((create_SNP_GeneSNP_Associations(snp, reg[snp], cisreg[snp]) for snp in cisreg))
 
@@ -577,6 +580,7 @@ def create_SNP_GeneSNP_Associations(snp, reg, cisreg):
 
 	"""
 	intermediary_scores, gene_scores = compute_v2g_scores(reg, cisreg)
+	#logging.info("### intermediary_scores is: %s ###" % intermediary_scores)
 	rank = dict((score, index) for index, score in enumerate(sorted(gene_scores.values(), reverse=True)))
 
 	return [ GeneSNP_Association(
@@ -588,6 +592,7 @@ def create_SNP_GeneSNP_Associations(snp, reg, cisreg):
 		score = gene_scores[gene],
 		rank = rank[gene_scores[gene]] + 1)
 	for gene in cisreg ]
+
 
 def compute_v2g_scores(reg, cisreg):
 	"""
@@ -670,6 +675,7 @@ def cisregulatory_evidence(ld_snps, tissues):
 			logging.info(("Found %i cis-regulatory interactions in all databases" % (len(res))))
 		else:
 			logging.info(("Found %i cis-regulatory interactions in (%s)" % (len(res), ", ".join(postgap.Globals.Cisreg_adaptors))))
+	#logging.info("### CISREG EVIDENCE is: %s ###" % (res))			
 	return res
 
 def regulatory_evidence(snps, tissues):
@@ -696,7 +702,7 @@ def regulatory_evidence(snps, tissues):
 	hash = collections.defaultdict(list)
 	for hit in res:
 		hash[hit.snp].append(hit)
-
+	#logging.info("### REG EVIDENCE is: %s ###" % (hash))			
 	return hash
 
 def gene_to_phenotypes(gene):

@@ -72,7 +72,7 @@ class Regulome(Reg_source):
 
 		logging.info("\tFound %i regulatory variants in Regulome" % (len(res)))
 		logging.info("\tProcessed FILE: %s" % (postgap.Globals.DATABASES_DIR + "/Regulome.bed.gz"))
-
+		logging.info("Regulome is: %s" % (res))
 		return res
 
 	def get_regulome_evidence(self, feature, snp_hash):
@@ -206,7 +206,7 @@ class VEP_reg(Reg_source):
 						break
 
 		logging.info("\tFound %i interactions in VEP" % (len(res)))
-
+		logging.info("VEP_reg is: %s" % (res))
 		return res
 
 	def get_score(self, hit):
@@ -344,6 +344,7 @@ class CAPE_eQTL(Reg_source):
 			))
 		logging.info("\tFound %i interactions in CAPE_eQTL" % (len(res)))
 		logging.info("\tProcessed FILE/s: %s" % (tissues_f))
+		logging.info("CAPE_eQTL is: %s" % (res))
 		return res
 
 
@@ -369,6 +370,7 @@ class CAPE_dsQTL(Reg_source):
 			))
 		logging.info("\tFound %i interactions in CAPE_dsQTL" % (len(res)))
 		logging.info("\tProcessed FILE/s: %s" % (tissues_f))
+		logging.info("CAPE_dsQTL is: %s" % (res))
 		return res
 		
 class deltaSVM(Reg_source):
@@ -393,6 +395,7 @@ class deltaSVM(Reg_source):
 			))
 		logging.info("\tFound %i interactions in deltaSVM" % (len(res)))
 		logging.info("\tProcessed FILE/s: %s" % (tissues_f))
+		logging.info("deltaSVM is: %s" % (res))
 		return res		
 		
 
@@ -418,6 +421,7 @@ class DeepSEA(Reg_source):
 			))
 		logging.info("\tFound %i interactions in DeepSEA" % (len(res)))
 		logging.info("\tProcessed FILE/s: %s" % (tissues_f))
+		logging.info("DeepSEA is: %s" % (res))
 		return res			
 	
 
@@ -429,6 +433,7 @@ class CATO(Reg_source):
 		intersection = postgap.BedTools.overlap_snps_to_bed(ld_snps, postgap.Globals.DATABASES_DIR + "/CATO_Average.bed")
 		res = filter (lambda X: X.score, (self.get_cato_evidence(feature, snp_hash) for feature in intersection))
 		logging.info("\tFound %i regulatory variants in CATO" % (len(res)))
+		logging.info("CATO is: %s" % (res))
 		return res
 	
 	def get_cato_evidence(self, feature, snp_hash):
@@ -464,6 +469,7 @@ class DNase1(Reg_source):
 			))
 		logging.info("\tFound %i interactions in DNase1" % (len(res)))
 		logging.info("\tProcessed FILE/s: %s" % (tissues_f))
+		logging.info("DNase1 is: %s" % (res))
 		return res		
 		
 
