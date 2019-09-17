@@ -26,3 +26,7 @@ venv
 .vscode
 *.pkl
 *.tsv*
+*.txt
+*.csv
+*_log
+*.pdf
