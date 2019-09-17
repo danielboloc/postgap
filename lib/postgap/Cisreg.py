@@ -47,6 +47,7 @@ import postgap.FinemapIntegration
 ## new imports
 import fnmatch
 import os
+import tissueconfig
 
 VEP_impact_to_score = {
 	'HIGH': 4,
@@ -59,6 +60,11 @@ VEP_impact_to_score = {
 class Cisreg_source(object):
 	def run(self, snps, tissues):
 		assert False, "This stub should be defined"
+	def filter_from_input_tissues(self, path, file_prefix, dataset_name):
+		if postgap.Globals.USER_TISSUE is None:
+			return fnmatch.filter(os.listdir(path), '*.bed.gz') 
+		else:
+			return ["%s%d.bed.gz" % (file_prefix,idx) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name] ] 	
 
 class GTEx(Cisreg_source):
 	display_name = "GTEx"
@@ -76,7 +82,7 @@ class GTEx(Cisreg_source):
 
 		res = concatenate(map(self.snp, snps))
 		logging.info("\tFound %i interactions in GTEx" % (len(res)))
-		#logging.info("\tBETA is: %s" % (res))
+		logging.info("\tPVALUE is: %s" % ([cis.pvalue for cis in res]))
 		return res
 
 	def snp(self, snp):
@@ -739,17 +745,19 @@ class Jeme_ENCODE(Cisreg_source):
 	display_name = "Jeme_ENCODE"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_ENCODE" % len(snps))
-		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed.gz')
+#		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed.gz') if postgap.Globals.USER_TISSUE is None \
+#			else ["encoderoadmap_lasso.%d.bed.gz" % idx for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue]['Jeme_ENCODE'] ]
+		tissues_f = self.filter_from_input_tissues('databases/Jeme_ENCODE/','encoderoadmap_lasso.','Jeme_ENCODE')			 
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:
 			intersection = postgap.BedTools.overlap_snps_to_bed(snps, postgap.Globals.DATABASES_DIR + '/Jeme_ENCODE/' + tf)
 			for feature in intersection:
-				gene = postgap.Ensembl_lookup.get_gene(feature[4])
+				gene = postgap.Ensembl_lookup.get_gene(feature[3])
 				if gene is None:
 					return None
 				snp = snp_hash[feature[8]]
-				score= float(feature[3])
+				score= float(feature[4])
 				res.append(Cisregulatory_Evidence(
 				snp = snp,
 						gene = gene,
@@ -763,7 +771,8 @@ class Jeme_ENCODE(Cisreg_source):
 						tissue = tf
 				))
 		logging.info("\tFound %i interactions in Jeme_ENCODE" % (len(res)))
-		logging.info("JEME_ENCODE is: %s" % (res))
+		#logging.info("JEME_ENCODE is: %s" % (res))
+		logging.info("JEME_ENCODE is: %s" % (tissues_f))
 		return res
 
 class GWAS_Genes(Cisreg_source):
@@ -799,7 +808,8 @@ class Jeme_FANTOM5(Cisreg_source):
 	display_name = "Jeme_FANTOM5"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_FANTOM5" % len(snps))
-		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed.gz')
+		#tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed.gz')
+		tissues_f = self.filter_from_input_tissues('databases/Jeme_FANTOM5/','fantom5_lasso.','Jeme_FANTOM5')			 
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:
@@ -824,7 +834,7 @@ class Jeme_FANTOM5(Cisreg_source):
 					tissue = tf
 				))
 		logging.info("\tFound %i interactions in Jeme_FANTOM5" % (len(res)))
-		logging.info("JEME_FANTOM5 is: %s" % (res))
+		logging.info("JEME_FANTOM5 is: %s" % (tissues_f))
 		return res
 	
 class nearest_gene(Cisreg_source):

@@ -173,6 +173,9 @@ def main():
 	if options.Reg is not None:
 		postgap.Globals.Reg_adaptors = options.Reg
 
+	if options.tissues is not None:
+		postgap.Globals.USER_TISSUE = options.tissues	
+
 	# Print the file that is working on to get more clues about downstream errors
 	logging.info("### WORKING WITH FILE: %s ###" % postgap.Globals.GWAS_SUMMARY_STATS_FILE) 	
 

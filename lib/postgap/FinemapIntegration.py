@@ -45,7 +45,6 @@ def compute_gwas_posteriors(cluster_associations, populations):
                 Arg3: binom/ ML/ EM/ ML_EM
 		Returntype: [(GWAS_Cluster, GeneSNP_Associations)]
 	"""
-	#prepped_clusters = [(prepare_cluster_for_finemap(cluster, associations, populations), associations) for cluster, associations in cluster_associations]
 	prepped_clusters = []
 	for cluster, associations in cluster_associations:
 		if ( len(cluster.ld_snps) < 100 ):
@@ -54,7 +53,7 @@ def compute_gwas_posteriors(cluster_associations, populations):
 		prepped_cluster_rsIDs = [ld_snp.rsID for ld_snp in prepped_cluster.ld_snps]
 		filtered_associations = [association for association in associations if association.snp.rsID in prepped_cluster_rsIDs]
 		prepped_clusters.append( (prepped_cluster, filtered_associations) )
-    # MLE calculation 
+	# MLE calculation 
 	modified_clusters= [(postgap.Finemap.mk_modified_clusters(cluster), associations) for cluster, associations in prepped_clusters]
 	pickle.dump(modified_clusters, open('prepped_clusters_'+postgap.Globals.GWAS_SUMMARY_STATS_FILE+'.pkl', "w"))
 	return [(finemap_gwas_cluster(cluster), associations) for cluster, associations in modified_clusters]

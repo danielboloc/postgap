@@ -77,6 +77,7 @@ GWAS_SUMMARY_STATS_FILE = None
 PERFORM_BAYESIAN = False
 
 ALL_TISSUES=[]
+USER_TISSUE = None
 
 source_list=[]
 

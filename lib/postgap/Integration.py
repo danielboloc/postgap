@@ -173,7 +173,7 @@ def clusters_to_genes(clusters, populations, tissue_weights):
 
 	"""
 	# Collect regulatory and cis-regulatory evidence across clusters
-	print "CLUSTER ORIG", clusters
+	#print "CLUSTER ORIG", clusters
 	cluster_associations = [(cluster, ld_snps_to_genes(cluster.ld_snps, tissue_weights)) for cluster in clusters]
 	with open('cluster_association_'+postgap.Globals.OUTPUT+'.pkl','w') as f:
 	        pickle.dump(cluster_associations,f)
