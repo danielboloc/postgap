@@ -36,6 +36,7 @@ import collections
 import cPickle as pickle
 
 from postgap.DataModel import *
+import tissueconfig
 
 def compute_gwas_posteriors(cluster_associations, populations):
 	"""
@@ -443,7 +444,8 @@ def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotati
                 z_scores     = numpy.array(z_scores),
                 beta_scores  = numpy.array(betas),
                 cov_matrix   = cluster.ld_matrix,
-                n            = 500, #TODO extract eQTL sample sizes
+                #n            = 500, #TODO extract eQTL sample sizes
+                n            = tissueconfig.GTEx_samples.get(tissue, 500), #extract eQTL sample sizes
                 labels       = [ld_snp.rsID for ld_snp in cluster.ld_snps],
                 sample_label = sample_label,
                 lambdas      = lambdas, #cluster.lambdas, # Update the lambdas with eQTL data
