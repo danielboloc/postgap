@@ -33,3 +33,4 @@ venv
 *.vcf.gz
 *.bed.gz
 *.bed
+*.tbi
