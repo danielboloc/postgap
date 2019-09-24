@@ -3,7 +3,7 @@ DIR_REGEX=~\/Escritorio\/PROJECTS\/postgap_DB\/postgap\/datasets
 
 default: create download process
 create: create_dir
-download: d_DNase1 tabix
+download: d_DNase1
 #process: Jeme_FANTOM5
 
 create_dir:
@@ -45,34 +45,37 @@ d_DNase1:
 # Jeme_FANTOM5:
 # 	@for f in $(wildcard ${DEST_DIR}/raw/Jeme_FANTOM5/*.csv) ; do \
 # 		awk 'BEGIN{FS=","; OFS="\t"}{split($$1,chr,":"); split(chr[2],pos,"-"); split($$2,gene,"$$"); gsub("chr","",chr[1]); print chr[1],pos[1],pos[2],gene[2],$$3;}' $$f | sort -k 1,1 -k2,2n $$f >> $${f%.csv}.bed; done
-tabix: bgzip
-	$(eval bgz_files:=$(wildcard ${DEST_DIR}/raw/DNase1/*.bed.gz))
-	$(foreach file, $(gz_files), tabix -f -p bed $(file);)
+# tabix: bgzip
+# 	$(eval bgz_files:=$(wildcard ${DEST_DIR}/raw/DNase1/*.bed.gz))
+# 	$(foreach file, $(gz_files), tabix -f -p bed $(file);)
 
-bgzip: unzip
-	$(eval bed_files:=$(wildcard ${DEST_DIR}/raw/DNase1/*.bed))
-	$(foreach file, $(bed_files), bgzip $(file);)
+# bgzip: unzip
+# 	$(eval bed_files:=$(wildcard ${DEST_DIR}/raw/DNase1/*.bed))
+# 	$(foreach file, $(bed_files), bgzip $(file);)
 
-unzip:
-	$(eval gz_files:=$(wildcard ${DEST_DIR}/raw/DNase1/*.bed.gz))
-	$(foreach file, $(gz_files), gunzip $(file);)
+# unzip:
+# 	$(eval gz_files:=$(wildcard ${DEST_DIR}/raw/DNase1/*.bed.gz))
+# 	$(foreach file, $(gz_files), gunzip $(file);)
 
 
 define process_SNP_file
 zcat $(1) \
 | awk 'BEGIN{FS="\t";OFS="\t"} FNR>1 {chr=gsub("chr", "", $$1); print chr, $$2-1, $$2, $$6;}' - \
 | sort -k1,1 -k2,2n - \
-> `dirname $(1)`/`basename $(1) | sed -e 's/vcf.gz/bed/'`;
-bgzip -f `dirname $(1)`/`basename $(1) | sed -e 's/vcf.gz/bed/'`;
-tabix -f -p bed `dirname $(1)`/`basename $(1) | sed -e 's/vcf.gz/bed/'`.gz;
+> $(2);
+$(call tabix,$(2));
 endef
 
 define process_Jeme_file
 awk 'BEGIN{FS=","; OFS="\t"}{split($$1,chr,":"); split(chr[2],pos,"-"); split($$2,gene,"$$"); gsub("chr","",chr[1]); print chr[1],pos[1],pos[2],gene[2],$$3;}' $(1) \
 | sort -k1,1 -k2,2n - \
-> `dirname $(1)`/`basename $(1) | sed -e 's/csv/bed/'`;
-bgzip -f `dirname $(1)`/`basename $(1) | sed -e 's/csv/bed/'`;
-tabix -f -p bed `dirname $(1)`/`basename $(1) | sed -e 's/csv/bed/'`.gz;
+> $(2);
+$(call tabix,$(2));
+endef
+
+define process_DNase1_file
+gunzip $(1)
+$(call tabix,$(2));
 endef
 
 define bgz
@@ -84,11 +87,11 @@ $(call bgz, $(1))
 tabix -f -p bed $(1).gz
 endef	
 
-.PHONY: CAPE_eQTL CAPE_dsQTL deltaSVM DeepSEA 
+.PHONY: CAPE_eQTL CAPE_dsQTL deltaSVM DeepSEA DNase1
 
 CAPE_eQTL:
 	$(eval vcf_files := $(wildcard ${DEST_DIR}/raw/CAPE_eQTL/*.vcf.gz))
-	$(foreach file, $(vcf_files), $(call process_SNP_file, $(file)))
+	$(foreach file, $(vcf_files), $(call process_SNP_file, $(file),$(subst vcf.gz,bed,$(file))))
 
 CAPE_dsQTL:
 	$(eval vcf_files := $(wildcard ${DEST_DIR}/raw/CAPE_dsQTL/*.vcf.gz))
@@ -104,11 +107,12 @@ DeepSEA:
 
 Jeme_ENCODE:
 	$(eval csv_files := $(wildcard ${DEST_DIR}/raw/Jeme_ENCODE/*.csv))
-	$(foreach file, $(csv_files), $(call process_Jeme_file, $(file)))
+	$(foreach file, $(csv_files), $(call process_Jeme_file, $(file),$(subst csv,bed,$(file))))
 
 Jeme_FANTOM5:
 	$(eval csv_files := $(wildcard ${DEST_DIR}/raw/Jeme_FANTOM5/*.csv))
-	$(foreach file, $(csv_files), $(call process_Jeme_file, $(file)))
+	$(foreach file, $(csv_files), $(call process_Jeme_file, $(file),$(subst csv,bed,$(file))))
 
 DNase1:
-	$(eval csv_files := $(wildcard ${DEST_DIR}/raw/DNase1/*.bed.gz))	
+	$(eval gz_files := $(wildcard ${DEST_DIR}/raw/DNase1/*.bed.gz))
+	$(foreach file, $(gz_files), $(call process_DNase1_file, $(file),$(subst bed.gz,bed,$(file))))	
