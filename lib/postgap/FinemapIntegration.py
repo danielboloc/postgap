@@ -46,11 +46,12 @@ def compute_gwas_posteriors(cluster_associations, populations):
                 Arg3: binom/ ML/ EM/ ML_EM
 		Returntype: [(GWAS_Cluster, GeneSNP_Associations)]
 	"""
+	#prepped_clusters = [(prepare_cluster_for_finemap(cluster, associations, populations), associations) for cluster, associations in cluster_associations]
 	prepped_clusters = []
 	for cluster, associations in cluster_associations:
-		if ( len(cluster.ld_snps) < 100 ):
-			continue
 		prepped_cluster = prepare_cluster_for_finemap(cluster, associations, populations)
+		if ( len(prepped_cluster.ld_snps) < 10 ):
+			continue
 		prepped_cluster_rsIDs = [ld_snp.rsID for ld_snp in prepped_cluster.ld_snps]
 		filtered_associations = [association for association in associations if association.snp.rsID in prepped_cluster_rsIDs]
 		prepped_clusters.append( (prepped_cluster, filtered_associations) )
