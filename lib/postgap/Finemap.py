@@ -1053,7 +1053,7 @@ def mk_modified_clusters(p_cluster, W = [0.01, 0.1, 0.5], pi = 0.01):
         #To DO: Setting option for quantative and qualitative trait (Default for GWAS is qualitative and for eQTL is quantitative)
         #approx_v   = [calc_approx_v(maf, sample_size)  for maf in MAFs]
         #To DO: sampN_case / sampN_control setting
-        approx_v   = [calc_approx_v_cc(maf, sampN_case= 11846, sampN_control=440418)  for maf in MAFs]
+        approx_v   = [calc_approx_v_cc(maf, sampN_case=310, sampN_control=237)  for maf in MAFs]
 
         logBFs     = [calc_logBF(approx_v[i], W, z_scores[i]) for i in range(len(z_scores))]
         mat_annot  = p_cluster.annotations.T
