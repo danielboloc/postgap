@@ -47,11 +47,11 @@ def compute_gwas_posteriors(cluster_associations, populations):
 		Returntype: [(GWAS_Cluster, GeneSNP_Associations)]
 	"""
 	#prepped_clusters = [(prepare_cluster_for_finemap(cluster, associations, populations), associations) for cluster, associations in cluster_associations]
-	prepped_clusters = []
-	for cluster, associations in cluster_associations:
-		prepped_cluster = prepare_cluster_for_finemap(cluster, associations, populations)
-		if ( len(prepped_cluster.ld_snps) < 10 ):
-			continue
+        prepped_clusters = []
+        for cluster, associations in cluster_associations:
+	        prepped_cluster = prepare_cluster_for_finemap(cluster, associations, populations)
+                if ( len(prepped_cluster.ld_snps) < 10 ):
+                    continue
 		prepped_cluster_rsIDs = [ld_snp.rsID for ld_snp in prepped_cluster.ld_snps]
 		filtered_associations = [association for association in associations if association.snp.rsID in prepped_cluster_rsIDs]
 		prepped_clusters.append( (prepped_cluster, filtered_associations) )
@@ -194,8 +194,8 @@ def extract_z_scores_from_file(cluster):
 				GWAS_SNP(
 					snp = ld_snp_hash[rsID],
 					pvalue = pvalue,
-					z_score = postgap.FinemapIntegration.z_score_from_pvalue(float(pvalue), float(beta)),
-					beta = float(beta),
+					z_score = postgap.FinemapIntegration.z_score_from_pvalue(pvalue, beta),
+					beta = beta,
 					evidence = [
 						GWAS_Association(
 							pvalue                            = float(pvalue),
@@ -222,16 +222,15 @@ def extract_z_scores_from_file(cluster):
 			missing -= 1
 			if missing == 0:
 				break
-	print "all_gwas_snps: %s" % str(all_gwas_snps)
-	print "cluster.ld_snps: %s" % str(cluster.ld_snps)
+	
 	return GWAS_Cluster(
 		gwas_snps = all_gwas_snps,
 		ld_snps = cluster.ld_snps,
 		ld_matrix = None,
 		z_scores = None,
-		betas = None,
-		mafs = None,
-		annotations = None,
+                betas = None,
+                mafs = None,
+                annotations = None,
 		gwas_configuration_posteriors = None
 	)
 
