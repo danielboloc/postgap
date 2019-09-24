@@ -419,7 +419,6 @@ def cluster_to_genes(cluster, associations, tissues, populations):
 		assert len(cluster.ld_snps) == cluster.ld_matrix.shape[0], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
 		assert len(cluster.ld_snps) == cluster.ld_matrix.shape[1], (len(cluster.ld_snps), cluster.ld_matrix.shape[0], cluster.ld_matrix.shape[1])
 		gene_tissue_posteriors = postgap.FinemapIntegration.compute_joint_posterior(cluster, associations)
-
 		res = [
 			GeneCluster_Association(
 			    gene = gene,
@@ -433,6 +432,9 @@ def cluster_to_genes(cluster, associations, tissues, populations):
 		]
 
 		logging.info("\tFound %i genes associated" % (len(res)))
+		#logging.info("\tCluster: %s" % (str(cluster)))
+		#logging.info("\tAssociations: %s" % (str(associations)))
+		#logging.info("\tCollocalization posteriors: %s" % ([ gene_tissue_posteriors[gene] for gene in gene_tissue_posteriors ]))
 
     else:
 		# Compute LD from top SNP

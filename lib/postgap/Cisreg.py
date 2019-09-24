@@ -61,6 +61,14 @@ class Cisreg_source(object):
 	def run(self, snps, tissues):
 		assert False, "This stub should be defined"
 	def filter_from_input_tissues(self, path, file_prefix, dataset_name):
+		"""
+			Only process selected files depending on which tissue they belong
+			Args:
+			* str 
+			* str 
+			* str 
+			ReturnType: [ filenames ] 
+		"""		
 		if postgap.Globals.USER_TISSUE is None:
 			return fnmatch.filter(os.listdir(path), '*.bed.gz') 
 		else:
@@ -747,7 +755,7 @@ class Jeme_ENCODE(Cisreg_source):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_ENCODE" % len(snps))
 #		tissues_f=fnmatch.filter(os.listdir('databases/Jeme_ENCODE/'), '*.bed.gz') if postgap.Globals.USER_TISSUE is None \
 #			else ["encoderoadmap_lasso.%d.bed.gz" % idx for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue]['Jeme_ENCODE'] ]
-		tissues_f = self.filter_from_input_tissues('databases/Jeme_ENCODE/','encoderoadmap_lasso.','Jeme_ENCODE')			 
+		tissues_f = self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/Jeme_ENCODE/','encoderoadmap_lasso.','Jeme_ENCODE')			 
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:
@@ -779,7 +787,7 @@ class GWAS_Genes(Cisreg_source):
 	display_name = "GWAS_Genes"
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to GWAS_Genes" % len(snps))
-		tissues_f=fnmatch.filter(os.listdir('databases/SCZ/GWAS-Genes/'), '*.bed.gz')
+		tissues_f=fnmatch.filter(os.listdir(postgap.Globals.DATABASES_DIR+'/SCZ/GWAS-Genes/'), '*.bed.gz')
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:
@@ -809,7 +817,7 @@ class Jeme_FANTOM5(Cisreg_source):
   	def run(self, snps, tissues):
 		logging.info("\tSearching for overlaps from %i SNPs to Jeme_FANTOM5" % len(snps))
 		#tissues_f=fnmatch.filter(os.listdir('databases/Jeme_FANTOM5/'), '*.bed.gz')
-		tissues_f = self.filter_from_input_tissues('databases/Jeme_FANTOM5/','fantom5_lasso.','Jeme_FANTOM5')			 
+		tissues_f = self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/Jeme_FANTOM5/','fantom5_lasso.','Jeme_FANTOM5')			 
 		snp_hash = dict( (snp.rsID, snp) for snp in snps)
 		res=[]
 		for tf in tissues_f:

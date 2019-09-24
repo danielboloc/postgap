@@ -40,6 +40,7 @@ import fnmatch
 
 ## new imports
 import os
+import tissueconfig
 
 class Reg_source(object):
 	def run(self, ld_snps, tissues):
@@ -53,6 +54,20 @@ class Reg_source(object):
 
 		"""
 		assert False, "This stub should be defined"
+
+	def filter_from_input_tissues(self, path, file_prefix, dataset_name):
+		"""
+			Only process selected files depending on which tissue they belong
+			Args:
+			* str 
+			* str 
+			* str 
+			ReturnType: [ filenames ] 
+		"""
+		if postgap.Globals.USER_TISSUE is None:
+			return fnmatch.filter(os.listdir(path), '*.bed.gz') 
+		else:
+			return ["%s%d.bed.gz" % (file_prefix,idx) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name] ] 	
 
 class Regulome(Reg_source):
 	display_name = "Regulome"
@@ -300,7 +315,7 @@ class GERP(Reg_source):
 class Diff_Meth(Reg_source):
 	display_name = "Diff_Meth"
 	def run(self, ld_snps, tissues):
-		tissues_f=fnmatch.filter(os.listdir('databases/SCZ/'), '*.bed.gz')
+		tissues_f=fnmatch.filter(os.listdir(postgap.Globals.DATABASES_DIR+'/SCZ/'), '*.bed.gz')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:
@@ -325,7 +340,8 @@ class Diff_Meth(Reg_source):
 class CAPE_eQTL(Reg_source):
 	display_name = "CAPE_eQTL"
 	def run(self, ld_snps, tissues):
-		tissues_f=fnmatch.filter(os.listdir('databases/CAPE_eQTL/'), '*.bed.gz')
+		#tissues_f=fnmatch.filter(os.listdir('databases/CAPE_eQTL/'), '*.bed.gz')
+		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/CAPE_eQTL/','CAPE_eQTL_','CAPE')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:
@@ -351,7 +367,8 @@ class CAPE_eQTL(Reg_source):
 class CAPE_dsQTL(Reg_source):
 	display_name = "CAPE_dsQTL"
 	def run(self, ld_snps, tissues):
-		tissues_f=fnmatch.filter(os.listdir('databases/CAPE_dsQTL/'), '*.bed.gz')
+		#tissues_f=fnmatch.filter(os.listdir('databases/CAPE_dsQTL/'), '*.bed.gz')
+		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/CAPE_dsQTL/','CAPE_dsQTL_','CAPE')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:
@@ -376,7 +393,8 @@ class CAPE_dsQTL(Reg_source):
 class deltaSVM(Reg_source):
 	display_name = "deltaSVM"
 	def run(self, ld_snps, tissues):
-		tissues_f=fnmatch.filter(os.listdir('databases/deltaSVM/'), '*.bed.gz')
+		#tissues_f=fnmatch.filter(os.listdir('databases/deltaSVM/'), '*.bed.gz')
+		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/deltaSVM/','deltaSVM_','deltaSVM')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:
@@ -402,7 +420,8 @@ class deltaSVM(Reg_source):
 class DeepSEA(Reg_source):
 	display_name = "DeepSEA"
 	def run(self, ld_snps, tissues):
-		tissues_f=fnmatch.filter(os.listdir('databases/DeepSEA/'), '*.bed.gz')
+		#tissues_f=fnmatch.filter(os.listdir('databases/DeepSEA/'), '*.bed.gz')
+		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/DeepSEA/','DeepSEA_','DeepSEA')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:
@@ -450,7 +469,8 @@ class CATO(Reg_source):
 class DNase1(Reg_source):
 	display_name = "DNase1"
 	def run(self, ld_snps, tissues):
-		tissues_f=fnmatch.filter(os.listdir('databases/DNase1/'), '*.bed.gz')
+		#tissues_f=fnmatch.filter(os.listdir('databases/DNase1/'), '*.bed.gz')
+		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/DNase1/','.','DNase1')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:

@@ -30,3 +30,6 @@ venv
 *.csv
 *_log
 *.pdf
+*.vcf.gz
+*.bed.gz
+*.bed

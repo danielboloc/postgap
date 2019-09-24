@@ -77,17 +77,18 @@ def prepare_cluster_for_finemap(cluster, associations, populations, tissue_weigh
 			cluster = extract_z_scores_from_file(cluster)
 		ld_snps, ld_matrix, z_scores, betas = impute_z_scores(cluster)
 
-        cluster_f = GWAS_Cluster(cluster.gwas_snps, ld_snps, ld_matrix, z_scores, betas, None, None, None)
+		cluster_f = GWAS_Cluster(cluster.gwas_snps, ld_snps, ld_matrix, z_scores, betas, None, None, None)
+		print "cluster_f: %s" % str(cluster_f)
 
-        #mafs = extract_snp_mafs(cluster_f, associations, populations)
-        mafs = extract_snp_mafs(cluster_f, associations, 'eur')
-        mafs = mafs.astype(float)
-        annotations = (extract_snp_annotations(cluster_f, associations) > 0.).astype('float')
-        #annotations = extract_snp_annotations(cluster_f, associations) 
+		#mafs = extract_snp_mafs(cluster_f, associations, populations)
+		mafs = extract_snp_mafs(cluster_f, associations, 'eur')
+		mafs = mafs.astype(float)
+		annotations = (extract_snp_annotations(cluster_f, associations) > 0.).astype('float')
+		#annotations = extract_snp_annotations(cluster_f, associations) 
 
 	assert len(ld_snps) ==  ld_matrix.shape[0]
 	assert len(ld_snps) ==  ld_matrix.shape[1]
-	return GWAS_Cluster(cluster.gwas_snps, ld_snps, ld_matrix, z_scores, betas, mafs, annotations, None) 
+	return GWAS_Cluster(cluster_f.gwas_snps, ld_snps, ld_matrix, z_scores, betas, mafs, annotations, None) 
 
 def extract_snp_mafs(cluster, associations, populations):
 	"""
@@ -186,14 +187,14 @@ def extract_z_scores_from_file(cluster):
 		# Chromosome	Position	MarkerName	Effect_allele	Non_Effect_allele	Beta	SE	Pvalue
 		#1	751343	rs28544273	A	T	-0.0146	0.0338	0.6651
 		chromosome, position, rsID, effect_allele, non_effect_allele, beta, se, pvalue = line.rstrip().split('\t')
-                rsID = rsID.strip() 
+		rsID = rsID.strip() 
 		if rsID in ld_snp_hash:
 			all_gwas_snps.append(
 				GWAS_SNP(
 					snp = ld_snp_hash[rsID],
 					pvalue = pvalue,
-					z_score = postgap.FinemapIntegration.z_score_from_pvalue(pvalue, beta),
-					beta = beta,
+					z_score = postgap.FinemapIntegration.z_score_from_pvalue(float(pvalue), float(beta)),
+					beta = float(beta),
 					evidence = [
 						GWAS_Association(
 							pvalue                            = float(pvalue),
@@ -220,15 +221,16 @@ def extract_z_scores_from_file(cluster):
 			missing -= 1
 			if missing == 0:
 				break
-	
+	print "all_gwas_snps: %s" % str(all_gwas_snps)
+	print "cluster.ld_snps: %s" % str(cluster.ld_snps)
 	return GWAS_Cluster(
 		gwas_snps = all_gwas_snps,
 		ld_snps = cluster.ld_snps,
 		ld_matrix = None,
 		z_scores = None,
-                betas = None,
-                mafs = None,
-                annotations = None,
+		betas = None,
+		mafs = None,
+		annotations = None,
 		gwas_configuration_posteriors = None
 	)
 
@@ -313,31 +315,31 @@ def finemap_gwas_cluster(cluster):
                 fw1.write( '\t'.join( map(str, [sample_label, postgap.Globals.source_lst[idx],L] ))+'\n' )
         # ======
 	## Compute posterior
-        if postgap.Globals.TYPE == 'binom' or postgap.Globals.TYPE =='ML':
-	    configuration_posteriors = postgap.Finemap.finemap_v1(
-		z_scores     = numpy.array(cluster.z_scores),
-		beta_scores  = numpy.array(cluster.betas),
-		cov_matrix   = cluster.ld_matrix,
-		n            = sample_size,
-		labels       = ld_snp_ids,
-		sample_label = sample_label,
- 		lambdas      = cluster.lambdas,
-		mafs         = cluster.mafs,
-		annotations  = cluster.annotations,
-	    )
-        elif postgap.Globals.TYPE == 'EM' or postgap.Globals.TYPE == 'ML_EM':
-            configuration_posteriors = postgap.Finemap.finemap_v2(
-                z_scores     = numpy.array(cluster.z_scores),
-                beta_scores  = numpy.array(cluster.betas),
-                cov_matrix   = cluster.ld_matrix,
-                n            = sample_size,
-                labels       = ld_snp_ids,
-                sample_label = sample_label,
-                lambdas      = cluster.lambdas,
-                mafs         = cluster.mafs,
-                annotations  = cluster.annotations,
-            )
-        print postgap.Globals.TYPE
+	if postgap.Globals.TYPE == 'binom' or postgap.Globals.TYPE =='ML':
+		configuration_posteriors = postgap.Finemap.finemap_v1(
+			z_scores     = numpy.array(cluster.z_scores),
+			beta_scores  = numpy.array(cluster.betas),
+			cov_matrix   = cluster.ld_matrix,
+			n            = sample_size,
+			labels       = ld_snp_ids,
+			sample_label = sample_label,
+			lambdas      = cluster.lambdas,
+			mafs         = cluster.mafs,
+			annotations  = cluster.annotations,
+		)
+	elif postgap.Globals.TYPE == 'EM' or postgap.Globals.TYPE == 'ML_EM':
+		configuration_posteriors = postgap.Finemap.finemap_v2(
+			z_scores     = numpy.array(cluster.z_scores),
+			beta_scores  = numpy.array(cluster.betas),
+			cov_matrix   = cluster.ld_matrix,
+			n            = sample_size,
+			labels       = ld_snp_ids,
+			sample_label = sample_label,
+			lambdas      = cluster.lambdas,
+			mafs         = cluster.mafs,
+			annotations  = cluster.annotations,
+		)
+	print postgap.Globals.TYPE
 	return GWAS_Cluster_with_lambdas(cluster.gwas_snps, cluster.ld_snps, cluster.ld_matrix, cluster.z_scores, cluster.betas, cluster.mafs, cluster.annotations, configuration_posteriors, cluster.lambdas) 
 
 def compute_joint_posterior(cluster, associations):
@@ -475,7 +477,7 @@ def compute_eqtl_posteriors(cluster, tissue, gene, eQTL_snp_hash, mafs, annotati
                 lambdas      = lambdas, #cluster.lambdas, # Update the lambdas with eQTL data
                 mafs         = mafs,
                 annotations  = annotations,
-                kmax         = 3, #eQTL_kmax
+                kmax         = 2, #eQTL_kmax
                 kstart       = 1 #eQTL_kstart
             )
 
