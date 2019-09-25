@@ -193,9 +193,9 @@ def extract_z_scores_from_file(cluster):
 			all_gwas_snps.append(
 				GWAS_SNP(
 					snp = ld_snp_hash[rsID],
-					pvalue = pvalue,
+					pvalue = float(pvalue),
 					z_score = postgap.FinemapIntegration.z_score_from_pvalue(float(pvalue), float(beta)),
-					beta = beta,
+					beta = float(beta),
 					evidence = [
 						GWAS_Association(
 							pvalue                            = float(pvalue),
