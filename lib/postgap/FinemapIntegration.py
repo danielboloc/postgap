@@ -73,6 +73,7 @@ def prepare_cluster_for_finemap(cluster, associations, populations, tissue_weigh
 
 	if len(cluster.ld_snps) == len(cluster.gwas_snps):
 		ld_snps, ld_matrix, z_scores, betas = compute_ld_matrix(cluster)
+		cluster_f = cluster
 	else:
 		if postgap.Globals.GWAS_SUMMARY_STATS_FILE is not None:
 			cluster = extract_z_scores_from_file(cluster)
