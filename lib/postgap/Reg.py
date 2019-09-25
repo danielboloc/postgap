@@ -66,8 +66,8 @@ class Reg_source(object):
 		"""
 		if postgap.Globals.USER_TISSUE is None:
 			return fnmatch.filter(os.listdir(path), '*.bed.gz') 
-		else:
-			return ["%s%d.bed.gz" % (file_prefix,idx) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name] ] 	
+		else: # %s%s both are str type
+			return ["%s%s.bed.gz" % (file_prefix,idx) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name] ] 	
 
 class Regulome(Reg_source):
 	display_name = "Regulome"
