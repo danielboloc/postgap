@@ -76,6 +76,7 @@ def prepare_cluster_for_finemap(cluster, associations, populations, tissue_weigh
 		cluster_f = cluster
 		mafs = extract_snp_mafs(cluster_f, associations, 'eur')
 		mafs = mafs.astype(float)
+		annotations = (extract_snp_annotations(cluster_f, associations) > 0.).astype('float')
 	else:
 		if postgap.Globals.GWAS_SUMMARY_STATS_FILE is not None:
 			cluster = extract_z_scores_from_file(cluster)
