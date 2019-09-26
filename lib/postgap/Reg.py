@@ -55,7 +55,7 @@ class Reg_source(object):
 		"""
 		assert False, "This stub should be defined"
 
-	def filter_from_input_tissues(self, path, file_prefix, dataset_name):
+	def filter_from_input_tissues(self, path, file_prefix,dataset_name, file_suffix=''):
 		"""
 			Only process selected files depending on which tissue they belong
 			Args:
@@ -67,7 +67,7 @@ class Reg_source(object):
 		if postgap.Globals.USER_TISSUE is None:
 			return fnmatch.filter(os.listdir(path), '*.bed.gz') 
 		else: # %s%s both are str type
-			return ["%s%s.bed.gz" % (file_prefix,idx) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name] ] 	
+			return ["%s%s%s.bed.gz" % (file_prefix,idx,file_suffix) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name]]
 
 class Regulome(Reg_source):
 	display_name = "Regulome"
@@ -470,7 +470,7 @@ class DNase1(Reg_source):
 	display_name = "DNase1"
 	def run(self, ld_snps, tissues):
 		#tissues_f=fnmatch.filter(os.listdir('databases/DNase1/'), '*.bed.gz')
-		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/DNase1/','.','DNase1')
+		tissues_f=self.filter_from_input_tissues(postgap.Globals.DATABASES_DIR+'/DNase1/','homo_sapiens.GRCh37.','DNase1','.DNase1.SWEmbl_R0005.peaks.20180925')
 		snp_hash = dict( (snp.rsID, snp) for snp in ld_snps)
 		res=[]
 		for tf in tissues_f:

@@ -60,7 +60,7 @@ VEP_impact_to_score = {
 class Cisreg_source(object):
 	def run(self, snps, tissues):
 		assert False, "This stub should be defined"
-	def filter_from_input_tissues(self, path, file_prefix, dataset_name):
+	def filter_from_input_tissues(self, path, file_prefix,dataset_name,file_suffix=''):
 		"""
 			Only process selected files depending on which tissue they belong
 			Args:
@@ -72,7 +72,7 @@ class Cisreg_source(object):
 		if postgap.Globals.USER_TISSUE is None:
 			return fnmatch.filter(os.listdir(path), '*.bed.gz') 
 		else:
-			return ["%s%d.bed.gz" % (file_prefix,idx) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name] ] 	
+			return ["%s%d%s.bed.gz" % (file_prefix,idx,file_suffix) for tissue in postgap.Globals.USER_TISSUE for idx in tissueconfig.GTEx_tissues[tissue][dataset_name]]
 
 class GTEx(Cisreg_source):
 	display_name = "GTEx"
