@@ -497,7 +497,7 @@ class DNase1(Reg_source):
 
 def get_filtered_subclasses(subclasses_filter):
 
-    return [subclass for subclass in sources if subclass.display_name in subclasses_filter]
+    return [subclass for subclass in sources if subclass.display_name in subclasses_filter and subclass.display_name is not 'GERP']
 
 
 sources = Reg_source.__subclasses__()
